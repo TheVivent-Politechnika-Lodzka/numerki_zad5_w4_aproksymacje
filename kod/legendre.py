@@ -1,71 +1,73 @@
-from utility import funDecorator
+from scipy.optimize import fsolve
+from scipy.misc import derivative
+import numpy as np
+from utility import funAdapter
+from utility import smartNewton as sn
+sn = sn.newtonSymbol
 
 class Legendre:
     FUN = None
     a = 0
     b = 0
-    # COEFS i X z `https://www.pamoc.it/tpc_num_int.html#GLQ`
 
     # w_i
-    COEFS = [
-        [1,        1,        0,        0,        0 ],
-        [0.55556,  0.88889,  0.55556,  0,        0 ],
-        [0.347855, 0.652145, 0.652145, 0.347855, 0 ],
-        [0.236927, 0.478629, 0.568889, 0.478629, 0.236927 ],
-        [0.171324, 0.360762, 0.467914, 0.467914, 0.360762, 0.171324 ]
-    ]
+    COEFS = []
 
     # q_i
-    X = [
-        [-0.57735,   0.57735,   0,        0,        0 ],
-        [-0.774597,  0,         0.774597, 0,        0 ],
-        [-0.861136, -0.339981,  0.339981, 0.861136, 0 ],
-        [-0.906180, -0.538469,  0,        0.538469, 0.906180 ],
-        [-0.932470, -0.661209, -0.238619, 0.238619, 0.661209, 0.932470 ]
-    ]
-
+    X = []
 
     def  __init__(self, fun, a, b):
         self.a = a # początek przedziału
         self.b = b # koniec przdziału
-        self.FUN_og = fun # funkcja całkowana
-        self.FUN = funDecorator(fun, a, b) # funkcja całkowana
-        # ^^^dekorator skalujący przedział z [a, b] na [-1, 1]
+        self.FUN = funAdapter(fun, self.a, self.b) # funkcja całkowana
+        # ^^^adapter skalujący przedział z [a, b] na [-1, 1]
 
-    def calc(self, m):
+    def getPureX(self, x):
+        return self.FUN(x)
+
+    def getIntegral(self, m):
         # policz wynik
         result = 0
         for i in range(0,m):
             # odpowiedni współczynnik * wartość funkcji w odpowiednim x
             result += self.COEFS[m-2][i] * self.FUN(self.X[m-2][i])
-        # poprawa wyniku w celu zeskalowania przedziału do [-1, 1]
-        result *= (self.b-self.a) / 2
         return result
 
-    def calcX(self):
-        test = [self.X[4]]
-        test.append([])
+    def calcRootsAndWeights(self, roots=2):
+        if roots < 2: raise Exception("LOL")
 
-        for i in range(len(test[0])):
-            result = self.COEFS[4][i] * self.FUN(test[0][i])
-            # result *= (self.b-self.a)*2
-            # result *= (self.a+self.b)/2
-            # result *= (self.a-self.b)/2 + (self.b+self.a)/2
-            # result *= -(self.a-self.b)/2
-            test[1].append(result)
+        def Pn(n):
+            def wrapper(q):
+                # https://en.wikipedia.org/wiki/Legendre_polynomials
+                # wzór na sumę iloczynów dwóch symboli newtona i potęgi ułamka
+                to_return = 0
+                for k in range(n+1):
+                    to_return += sn(n, k) * sn(n+k, k) * (((q-1) * 0.5) ** k)
+                return to_return
 
-        # scaleX = self.X[0][0] / test[0][0]
-        # scaleX = test[1][0] / self.FUN(self.X[0][0])
+            return wrapper
+        
+        Pr = Pn(roots)
+        qi = fsolve(Pr, np.linspace(-1,1,roots)) # znajdź miejsca zerowe, a więc qi
+        wi = []
+        for q in qi:
+            # wzór jest na wiki
+            wi.append(2 / \
+                ((1-(q**2)) * (derivative(Pr, q, dx=0.0001)**2)) \
+            )
 
-        # for i in range(len(test[0])):
-            # test[0][i] *= self.X[4][i] / test[0][i]
+        self.COEFS.append(wi)
+        self.X.append(qi)
+        
 
-            # test[0][i] = (self.a+self.b)/2 + ((self.b-self.a)*test[0][i])/2
-            # test[0][i] *= (self.b-self.a)/2
-            # test[0][i] += (self.a+self.b)/2
+    def getAprox(self, roots=2):
 
+        roots -=2
+        x = self.X[roots]
+        y = []
 
-        return test
+        for i in range(len(self.COEFS[roots])):
+            result = self.COEFS[roots][i] * self.FUN(self.X[roots][i])
+            y.append(result)
 
-    def test(self, x):
-        return self.COEFS[4][i] * self.FUN(x)
+        return x, y
