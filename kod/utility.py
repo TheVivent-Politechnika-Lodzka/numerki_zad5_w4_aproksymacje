@@ -22,12 +22,16 @@ def funAdapter(fun, A, B):
 class smartNewton(object):
 
     knownNewton = [[1]]
+    needed = 0
+    calculated = 0
 
     @classmethod
     def newtonSymbol(self, x, y):
         try:
+            self.needed += 1
             return self.knownNewton[x][y]
         except:
+            self.calculated += 1
             if len(self.knownNewton) < x:
                 self.newtonSymbol(x-1, x-1)
             
@@ -58,3 +62,14 @@ def horner(coefs):
         return to_return
 
     return wrapper
+
+def superScript(x : int) -> str:
+    superscr = "⁰¹²³⁴⁵⁶⁷⁸⁹"
+
+    to_return = ""
+    while x > 0:
+        i = x%10
+        x = x // 10
+        to_return = superscr[i] + to_return
+
+    return to_return

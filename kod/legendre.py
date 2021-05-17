@@ -4,6 +4,7 @@ import numpy as np
 from utility import funAdapter
 from utility import smartNewton as sn
 sn = sn.newtonSymbol
+from utility import superScript as sp
 
 def P0(x):
     try:
@@ -15,6 +16,7 @@ def P1(x):
     return x
 
 class Legendre:
+
 
     def  __init__(self, fun, a, b):
         self.a = a # początek przedziału
@@ -44,43 +46,50 @@ class Legendre:
             result += self.COEFS[m-2][i] * self.FUN(self.X[m-2][i])
         return result
 
+    def getPolyAsString(self) -> str:
+        coefs = self.c[::-1]
+
+        to_return = ""
+        for i in range(len(coefs)):
+            to_return += "+" if coefs[i] >= 0 else ""
+            to_return += str(coefs[i])
+            to_return += "x" + sp(len(coefs)-i-1) if len(coefs)-i-1 != 0 else ""
+
+        return to_return.lstrip("+")
+
     def getNextC(self):
-        i = len(self.c)+2
+        i = len(self.c)
+
         def top(x):
             return self.FUN(x) * self.Pn[i](x)
-        
-
+   
         numerator = Legendre(top, -1, 1)
-        numerator.calcRootsAndWeights(i)
+        numerator.calcRootsAndWeights(i+2)
+
+        self.c.append( numerator.getIntegral(i+2) / (((i)+0.5) ** (-1)) )
 
 
-        self.c.append( numerator.getIntegral(i) / ((i+0.5) ** (-1)) )
-
-    def getAllC(self):
-        return self.c
-
-    def getApproxX(self, x):
+    def getAprox(self, x):
         
         coefs = self.c
-        # coefs.reverse()
         
         if type(x) == np.ndarray:
             to_return = [0] * len(x)
-
             for i in range(len(coefs)):
                 for j in range(len(x)):
-                    to_return[j] = to_return[j] * self.Pn[i](x[j]) + coefs[i]
-
+                    to_return[j] += coefs[i] * self.Pn[i](x[j])
+        
         else:
             to_return = 0
-
             for i in range(len(coefs)):
-                to_return = to_return * self.Pn[i](x) + coefs[i]
+                to_return += coefs[i] * self.Pn[i](x)
         
         return to_return
 
     def calcRootsAndWeights(self, roots=2):
         if roots < 2: raise Exception("LOL（⊙ｏ⊙）")
+        if len(self.X) >= roots: return
+
         if len(self.Pn) < roots:
             self.calcRootsAndWeights(roots-1)
 
@@ -109,14 +118,4 @@ class Legendre:
         self.Pn.append(Pr)
         
 
-    def getAprox(self, roots=2):
-
-        roots -=2
-        x = self.X[roots]
-        y = []
-
-        for i in range(len(self.COEFS[roots])):
-            result = self.COEFS[roots][i] * self.FUN(self.X[roots][i])
-            y.append(result)
-
-        return x, y
+    
