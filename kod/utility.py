@@ -7,17 +7,17 @@ def funAdapter(fun, A, B):
     
     return wrapper
 
-class smartFactorial(object):
+# class smartFactorial(object):
 
-    knownFacs = [1]
+#     knownFacs = [1]
 
-    @classmethod
-    def factorial(self, x):
-        try:
-            return self.knownFacs[x]
-        except:
-            self.knownFacs.append(self.factorial(x-1)*x)
-            return self.knownFacs[x]
+#     @classmethod
+#     def factorial(self, x):
+#         try:
+#             return self.knownFacs[x]
+#         except:
+#             self.knownFacs.append(self.factorial(x-1)*x)
+#             return self.knownFacs[x]
 
 class smartNewton(object):
 
@@ -32,10 +32,29 @@ class smartNewton(object):
                 self.newtonSymbol(x-1, x-1)
             
             self.knownNewton.append([1])
+
             for i in range(1, len(self.knownNewton[x-1])):
                 self.knownNewton[x].append(\
                     self.knownNewton[x-1][i-1] + \
                     self.knownNewton[x-1][i]
                     )
+
             self.knownNewton[x].append(1)
             return self.knownNewton[x][y]
+
+
+def horner(coefs):
+
+    def wrapper(x):
+        
+        coefs.reverse()
+        to_return = coefs[0]
+        coefs.pop(0)
+
+        for coef in coefs:
+            to_return *= coef
+            to_return += x
+
+        return to_return
+
+    return wrapper

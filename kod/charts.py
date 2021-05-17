@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from numpy import arange
 
 def gen_chart(fun, aprox_x, aprox_y, filename):
-    # wczyczyść figurę
+    # wyczyść figurę
     plt.clf()
 
     x = arange(-1, 1, 0.01)
