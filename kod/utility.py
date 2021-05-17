@@ -51,15 +51,19 @@ def horner(coefs):
 
     def wrapper(x):
         
-        coefs.reverse()
-        to_return = coefs[0]
-        coefs.pop(0)
+        # coefs.reverse()
+        # to_return = coefs[0]
+        # coefs.pop(0)
 
-        for coef in coefs:
-            to_return *= coef
-            to_return += x
+        result = coefs[0]
+        for i in range(1, len(coefs)):
+            result = result*x + coefs[i]
 
-        return to_return
+        # for coef in coefs:
+        #     to_return *= coef
+        #     to_return += x
+
+        return result
 
     return wrapper
 
