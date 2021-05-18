@@ -17,7 +17,7 @@ def f0(x):
 #---#
 def f1(x):
     # policzenie schematem hornera [przedział -3.5 do 3.7]
-    # 0.3*x³ - 0.1x² - 3.7x + 0.4  [całka = -0.10008]
+    # 0.3x³ - 0.1x² - 3.7x + 0.4  [całka = -0.10008]
     coefficients = [0.3, -0.1, -3.7, 0.4]
     
     return horner(coefficients)(x)

@@ -46,9 +46,9 @@ print("Błąd aproksymacji: {}".format(APROX.getError()))
 if EPS != None:
     print("Epsilon: {}".format(EPS))
 
-# print()
-# from utility import smartNewton
-# print("Statystyki \"sprytnej\" funkcji do obliczania symbolu Newtona")
-# print("needed: {}\ncalculated: {}".format(smartNewton.needed, smartNewton.calculated))
+print()
+from utility import smartNewton
+print("Statystyki \"sprytnej\" funkcji do obliczania symbolu Newtona")
+print("needed: {}\ncalculated: {}".format(smartNewton.needed, smartNewton.calculated))
 
 gen_chart(APROX.getPureX, APROX.getAprox, "wykresy/{}_od{}_do{}.jpg".format(input("Podaj nazwę pliku: "), A, B))
